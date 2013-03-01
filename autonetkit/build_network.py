@@ -40,6 +40,7 @@ def grid_2d(dim):
     graph = nx.grid_2d_graph(dim, dim)
 
     for n in graph:
+        #TODO: use a dictionary for this
         graph.node[n]['asn'] = 1
         graph.node[n]['x'] = n[0] * 150
         graph.node[n]['y'] = n[1] * 150
@@ -67,7 +68,10 @@ def build(input_graph):
     """Main function to build network overlay topologies"""
     anm = autonetkit.anm.AbstractNetworkModel()
 
-    input_undirected = nx.Graph(input_graph)
+    if input_graph.is_multigraph():
+        input_undirected = nx.MultiGraph(input_graph)
+    else:
+        input_undirected = nx.Graph(input_graph)
     g_in = anm.add_overlay("input", graph=input_undirected)
     anm.add_overlay("input_directed", graph=input_graph, directed=True)
 

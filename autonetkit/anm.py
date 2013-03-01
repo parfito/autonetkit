@@ -1002,11 +1002,12 @@ class AbstractNetworkModel(object):
     def initialise_graph(self, graph):
         """Sets input graph. Converts to undirected. 
         Initialises graphics overlay."""
+#TODO: need to check for multigraph here
         graph = nx.Graph(graph)
         g_in = self.add_overlay("input", graph=graph, directed=False)
         g_graphics = self['graphics']
-        g_graphics.add_nodes_from(g_in, retain=['x', 'y', 'device_type',
-                                                'device_subtype', 'pop', 
+        g_graphics.add_nodes_from(g_in, 
+                retain=['x', 'y', 'device_type', 'device_subtype', 'pop', 
                                                 'asn'])
 
         return g_in
