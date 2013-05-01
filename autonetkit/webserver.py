@@ -450,7 +450,7 @@ def main():
     try:
         port = sys.argv[1]
     except IndexError:
-        port = 8000
+        port = 8002
     try:
         application.listen(port)
     except socket.error, e:

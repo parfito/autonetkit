@@ -129,6 +129,7 @@ def render_node(node, folder_cache):
                             )
 
         if render_base:
+            import re
             mako_tmp_dir = "cache"
             if render_base in folder_cache:
                 src_folder = folder_cache[render_base]['folder']
@@ -145,20 +146,69 @@ def render_node(node, folder_cache):
                     #os.mkdir(folder)
 
                 for template_file in fs_mako_templates:
-                    render_base_rel = resource_path(render_base)
-                    template_file_path = os.path.normpath(os.path.join(render_base_rel, template_file))
-                    mytemplate = mako.template.Template(filename=template_file_path,
-# disabled cache
-#module_directory= mako_tmp_dir
-                            )
-                    dst_file = os.path.normpath((os.path.join(render_base_output_dir, template_file)))
-                    dst_file, _ = os.path.splitext(dst_file) # remove .mako suffix
-                    with open( dst_file, 'wb') as dst_fh:
-                        dst_fh.write(mytemplate.render(
-                            node = node, 
-                            ank_version = ank_version,
-                            date = date,
-                            ))
+#                    print("template "+template_file)
+                    #si le template n'est pas du domaine dns
+                    if not re.match( r'(.*)var(.?)www(.?)index.html(.*)', template_file) and not re.match( r'(.*)etc(.?)bind(.*)', template_file) :
+                        render_base_rel = resource_path(render_base)
+                        template_file_path = os.path.normpath(os.path.join(render_base_rel, template_file))
+                        mytemplate = mako.template.Template(filename=template_file_path,
+        # disabled cache
+        #module_directory= mako_tmp_dir
+                                )
+                        dst_file = os.path.normpath((os.path.join(render_base_output_dir, template_file)))
+                        dst_file, _ = os.path.splitext(dst_file) # remove .mako suffix
+                        with open( dst_file, 'wb') as dst_fh:
+                            dst_fh.write(mytemplate.render(
+                                node = node, 
+                                ank_version = ank_version,
+                                date = date,
+                                ))
+                    if re.match( r'(.*)var(.?)www(.?)index.html(.*)', template_file): # si le template est le var/www/index.html.mako
+                        if node.is_webServer: 
+                            render_base_rel = resource_path(render_base)
+                            template_file_path = os.path.normpath(os.path.join(render_base_rel, template_file))
+                            mytemplate = mako.template.Template(filename=template_file_path,
+            # disabled cache
+            #module_directory= mako_tmp_dir
+                                    )
+                            dst_file = os.path.normpath((os.path.join(render_base_output_dir, template_file)))
+                            dst_file, _ = os.path.splitext(dst_file) # remove .mako suffix
+                            with open( dst_file, 'wb') as dst_fh:
+                                dst_fh.write(mytemplate.render(
+                                    node = node, 
+                                    ank_version = ank_version,
+                                    date = date,
+                                    ))
+                    if re.match( r'(.*)etc(.?)bind(.?)', template_file):
+                        if node.is_DNSNode: 
+                            render_base_rel = resource_path(render_base)
+                            template_file_path = os.path.normpath(os.path.join(render_base_rel, template_file))
+                            mytemplate = mako.template.Template(filename=template_file_path,
+            # disabled cache
+            #module_directory= mako_tmp_dir
+                                    )
+                            if re.match( r'(.*)db.zone.mako', template_file) : # normalemnt c'est db.zone.mako
+                                if node.is_nameServer:
+                                    dst_file = os.path.normpath((os.path.join(render_base_output_dir, template_file.replace('zone',str(node.domain)))))
+                                    dst_file, _ = os.path.splitext(dst_file) # remove .mako suffix
+                                    with open( dst_file, 'wb') as dst_fh:
+                                        dst_fh.write(mytemplate.render(
+                                            node = node, 
+                                            ank_version = ank_version,
+                                            date = date,
+                                            ))
+                                else :
+                                    pass
+                            else:
+                                dst_file = os.path.normpath((os.path.join(render_base_output_dir, template_file)))
+                                dst_file, _ = os.path.splitext(dst_file) # remove .mako suffix
+                                with open( dst_file, 'wb') as dst_fh:
+                                    dst_fh.write(mytemplate.render(
+                                        node = node, 
+                                        ank_version = ank_version,
+                                        date = date,
+                                        ))
+                            
                 return
                 
             render_base = resource_path(render_base)

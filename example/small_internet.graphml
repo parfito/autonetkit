@@ -34,7 +34,7 @@
           <y:Geometry height="33.18513870239258" width="48.98758316040039" x="-82.28743396430616" y="194.07214464181368"/>
           <y:Fill color="#CCCCFF" transparent="false"/>
           <y:BorderStyle color="#000000" type="line" width="1.0"/>
-          <y:NodeLabel alignment="center" autoSizePolicy="content" fontFamily="Dialog" fontSize="12" fontStyle="plain" hasBackgroundColor="false" hasLineColor="false" height="18.1328125" modelName="sandwich" modelPosition="s" textColor="#000000" visible="true" width="52.005859375" x="-1.5091381072998047" y="37.18513870239258">as100r2</y:NodeLabel>
+          <y:NodeLabel alignment="center" autoSizePolicy="content" fontFamily="Dialog" fontSize="12" fontStyle="plain" hasBackgroundColor="false" hasLineColor="false" height="18.701171875" modelName="sandwich" modelPosition="s" textColor="#000000" visible="true" width="47.365234375" x="0.8111743927001953" y="37.18513870239258">as100r2</y:NodeLabel>
           <y:SVGNodeProperties usingVisualBounds="false"/>
           <y:SVGModel svgBoundsPolicy="0">
             <y:SVGContent refid="1"/>
@@ -50,7 +50,7 @@
           <y:Geometry height="33.18513870239258" width="48.98758316040039" x="-34.492731977551216" y="254.07214464181368"/>
           <y:Fill color="#CCCCFF" transparent="false"/>
           <y:BorderStyle color="#000000" type="line" width="1.0"/>
-          <y:NodeLabel alignment="center" autoSizePolicy="content" fontFamily="Dialog" fontSize="12" fontStyle="plain" hasBackgroundColor="false" hasLineColor="false" height="18.1328125" modelName="sandwich" modelPosition="s" textColor="#000000" visible="true" width="52.005859375" x="-1.5091381072998047" y="37.18513870239258">as100r3</y:NodeLabel>
+          <y:NodeLabel alignment="center" autoSizePolicy="content" fontFamily="Dialog" fontSize="12" fontStyle="plain" hasBackgroundColor="false" hasLineColor="false" height="18.701171875" modelName="sandwich" modelPosition="s" textColor="#000000" visible="true" width="47.365234375" x="0.8111743927001953" y="37.18513870239258">as100r3</y:NodeLabel>
           <y:SVGNodeProperties usingVisualBounds="false"/>
           <y:SVGModel svgBoundsPolicy="0">
             <y:SVGContent refid="1"/>
@@ -60,13 +60,13 @@
     </node>
     <node id="n2">
       <data key="d4">100</data>
-      <data key="d5"><![CDATA[router]]></data>
+      <data key="d5"><![CDATA[switch]]></data>
       <data key="d9">
         <y:SVGNode>
           <y:Geometry height="33.18513870239258" width="48.98758316040039" x="25.507268022448784" y="194.07214464181368"/>
           <y:Fill color="#CCCCFF" transparent="false"/>
           <y:BorderStyle color="#000000" type="line" width="1.0"/>
-          <y:NodeLabel alignment="center" autoSizePolicy="content" fontFamily="Dialog" fontSize="12" fontStyle="plain" hasBackgroundColor="false" hasLineColor="false" height="18.1328125" modelName="sandwich" modelPosition="s" textColor="#000000" visible="true" width="52.005859375" x="-1.5091381072998047" y="37.18513870239258">as100r1</y:NodeLabel>
+          <y:NodeLabel alignment="center" autoSizePolicy="content" fontFamily="Dialog" fontSize="12" fontStyle="plain" hasBackgroundColor="false" hasLineColor="false" height="18.701171875" modelName="sandwich" modelPosition="s" textColor="#000000" visible="true" width="47.365234375" x="0.8111743927001953" y="37.18513870239258">as100r1</y:NodeLabel>
           <y:SVGNodeProperties usingVisualBounds="false"/>
           <y:SVGModel svgBoundsPolicy="0">
             <y:SVGContent refid="1"/>
@@ -82,7 +82,7 @@
           <y:Geometry height="33.18513870239258" width="48.98758316040039" x="25.507268022448784" y="-18.997337563116844"/>
           <y:Fill color="#CCCCFF" transparent="false"/>
           <y:BorderStyle color="#000000" type="line" width="1.0"/>
-          <y:NodeLabel alignment="center" autoSizePolicy="content" fontFamily="Dialog" fontSize="12" fontStyle="plain" hasBackgroundColor="false" hasLineColor="false" height="18.1328125" modelName="sandwich" modelPosition="s" textColor="#000000" visible="true" width="44.41796875" x="2.2848072052001953" y="37.18513870239258">as20r2</y:NodeLabel>
+          <y:NodeLabel alignment="center" autoSizePolicy="content" fontFamily="Dialog" fontSize="12" fontStyle="plain" hasBackgroundColor="false" hasLineColor="false" height="18.701171875" modelName="sandwich" modelPosition="s" textColor="#000000" visible="true" width="40.69140625" x="4.148088455200195" y="37.18513870239258">as20r2</y:NodeLabel>
           <y:SVGNodeProperties usingVisualBounds="false"/>
           <y:SVGModel svgBoundsPolicy="0">
             <y:SVGContent refid="1"/>
@@ -98,7 +98,7 @@
           <y:Geometry height="33.18513870239258" width="48.98758316040039" x="85.50726802244878" y="-78.99733756311684"/>
           <y:Fill color="#CCCCFF" transparent="false"/>
           <y:BorderStyle color="#000000" type="line" width="1.0"/>
-          <y:NodeLabel alignment="center" autoSizePolicy="content" fontFamily="Dialog" fontSize="12" fontStyle="plain" hasBackgroundColor="false" hasLineColor="false" height="18.1328125" modelName="sandwich" modelPosition="s" textColor="#000000" visible="true" width="44.41796875" x="2.2848072052001953" y="37.18513870239258">as20r3</y:NodeLabel>
+          <y:NodeLabel alignment="center" autoSizePolicy="content" fontFamily="Dialog" fontSize="12" fontStyle="plain" hasBackgroundColor="false" hasLineColor="false" height="18.701171875" modelName="sandwich" modelPosition="s" textColor="#000000" visible="true" width="40.69140625" x="4.148088455200195" y="37.18513870239258">as20r3</y:NodeLabel>
           <y:SVGNodeProperties usingVisualBounds="false"/>
           <y:SVGModel svgBoundsPolicy="0">
             <y:SVGContent refid="1"/>
@@ -114,7 +114,7 @@
           <y:Geometry height="33.18513870239258" width="48.98758316040039" x="145.50726802244878" y="-18.997337563116844"/>
           <y:Fill color="#CCCCFF" transparent="false"/>
           <y:BorderStyle color="#000000" type="line" width="1.0"/>
-          <y:NodeLabel alignment="center" autoSizePolicy="content" fontFamily="Dialog" fontSize="12" fontStyle="plain" hasBackgroundColor="false" hasLineColor="false" height="18.1328125" modelName="sandwich" modelPosition="s" textColor="#000000" visible="true" width="44.41796875" x="2.2848072052001953" y="37.18513870239258">as20r1</y:NodeLabel>
+          <y:NodeLabel alignment="center" autoSizePolicy="content" fontFamily="Dialog" fontSize="12" fontStyle="plain" hasBackgroundColor="false" hasLineColor="false" height="18.701171875" modelName="sandwich" modelPosition="s" textColor="#000000" visible="true" width="40.69140625" x="4.148088455200195" y="37.18513870239258">as20r1</y:NodeLabel>
           <y:SVGNodeProperties usingVisualBounds="false"/>
           <y:SVGModel svgBoundsPolicy="0">
             <y:SVGContent refid="1"/>
@@ -130,7 +130,7 @@
           <y:Geometry height="33.18513870239258" width="48.98758316040039" x="346.2572680224488" y="-139.99733756311684"/>
           <y:Fill color="#CCCCFF" transparent="false"/>
           <y:BorderStyle color="#000000" type="line" width="1.0"/>
-          <y:NodeLabel alignment="center" autoSizePolicy="content" fontFamily="Dialog" fontSize="12" fontStyle="plain" hasBackgroundColor="false" hasLineColor="false" height="18.1328125" modelName="sandwich" modelPosition="s" textColor="#000000" visible="true" width="36.830078125" x="6.078752517700195" y="37.18513870239258">as1r1</y:NodeLabel>
+          <y:NodeLabel alignment="center" autoSizePolicy="content" fontFamily="Dialog" fontSize="12" fontStyle="plain" hasBackgroundColor="false" hasLineColor="false" height="18.701171875" modelName="sandwich" modelPosition="s" textColor="#000000" visible="true" width="34.017578125" x="7.485002517700195" y="37.18513870239258">as1r1</y:NodeLabel>
           <y:SVGNodeProperties usingVisualBounds="false"/>
           <y:SVGModel svgBoundsPolicy="0">
             <y:SVGContent refid="1"/>
@@ -146,7 +146,7 @@
           <y:Geometry height="33.18513870239258" width="48.98758316040039" x="451.5072680224488" y="85.19471541701569"/>
           <y:Fill color="#CCCCFF" transparent="false"/>
           <y:BorderStyle color="#000000" type="line" width="1.0"/>
-          <y:NodeLabel alignment="center" autoSizePolicy="content" fontFamily="Dialog" fontSize="12" fontStyle="plain" hasBackgroundColor="false" hasLineColor="false" height="18.1328125" modelName="sandwich" modelPosition="s" textColor="#000000" visible="true" width="44.41796875" x="2.2848072052001953" y="37.18513870239258">as40r1</y:NodeLabel>
+          <y:NodeLabel alignment="center" autoSizePolicy="content" fontFamily="Dialog" fontSize="12" fontStyle="plain" hasBackgroundColor="false" hasLineColor="false" height="18.701171875" modelName="sandwich" modelPosition="s" textColor="#000000" visible="true" width="40.69140625" x="4.148088455200195" y="37.18513870239258">as40r1</y:NodeLabel>
           <y:SVGNodeProperties usingVisualBounds="false"/>
           <y:SVGModel svgBoundsPolicy="0">
             <y:SVGContent refid="1"/>
@@ -162,7 +162,7 @@
           <y:Geometry height="33.18513870239258" width="48.98758316040039" x="324.6099170290713" y="85.19471541701569"/>
           <y:Fill color="#CCCCFF" transparent="false"/>
           <y:BorderStyle color="#000000" type="line" width="1.0"/>
-          <y:NodeLabel alignment="center" autoSizePolicy="content" fontFamily="Dialog" fontSize="12" fontStyle="plain" hasBackgroundColor="false" hasLineColor="false" height="18.1328125" modelName="sandwich" modelPosition="s" textColor="#000000" visible="true" width="44.41796875" x="2.2848072052001953" y="37.18513870239258">as30r1</y:NodeLabel>
+          <y:NodeLabel alignment="center" autoSizePolicy="content" fontFamily="Dialog" fontSize="12" fontStyle="plain" hasBackgroundColor="false" hasLineColor="false" height="18.701171875" modelName="sandwich" modelPosition="s" textColor="#000000" visible="true" width="40.69140625" x="4.148088455200195" y="37.18513870239258">as30r1</y:NodeLabel>
           <y:SVGNodeProperties usingVisualBounds="false"/>
           <y:SVGModel svgBoundsPolicy="0">
             <y:SVGContent refid="1"/>
@@ -178,7 +178,7 @@
           <y:Geometry height="33.18513870239258" width="48.98758316040039" x="421.8775321775071" y="194.07214464181368"/>
           <y:Fill color="#CCCCFF" transparent="false"/>
           <y:BorderStyle color="#000000" type="line" width="1.0"/>
-          <y:NodeLabel alignment="center" autoSizePolicy="content" fontFamily="Dialog" fontSize="12" fontStyle="plain" hasBackgroundColor="false" hasLineColor="false" height="18.1328125" modelName="sandwich" modelPosition="s" textColor="#000000" visible="true" width="52.005859375" x="-1.5091381072998047" y="37.18513870239258">as300r1</y:NodeLabel>
+          <y:NodeLabel alignment="center" autoSizePolicy="content" fontFamily="Dialog" fontSize="12" fontStyle="plain" hasBackgroundColor="false" hasLineColor="false" height="18.701171875" modelName="sandwich" modelPosition="s" textColor="#000000" visible="true" width="47.365234375" x="0.8111743927001953" y="37.18513870239258">as300r1</y:NodeLabel>
           <y:SVGNodeProperties usingVisualBounds="false"/>
           <y:SVGModel svgBoundsPolicy="0">
             <y:SVGContent refid="1"/>
@@ -194,7 +194,7 @@
           <y:Geometry height="33.18513870239258" width="48.98758316040039" x="421.8775321775071" y="268.565576344168"/>
           <y:Fill color="#CCCCFF" transparent="false"/>
           <y:BorderStyle color="#000000" type="line" width="1.0"/>
-          <y:NodeLabel alignment="center" autoSizePolicy="content" fontFamily="Dialog" fontSize="12" fontStyle="plain" hasBackgroundColor="false" hasLineColor="false" height="18.1328125" modelName="sandwich" modelPosition="s" textColor="#000000" visible="true" width="52.005859375" x="-1.5091381072998047" y="37.18513870239258">as300r3</y:NodeLabel>
+          <y:NodeLabel alignment="center" autoSizePolicy="content" fontFamily="Dialog" fontSize="12" fontStyle="plain" hasBackgroundColor="false" hasLineColor="false" height="18.701171875" modelName="sandwich" modelPosition="s" textColor="#000000" visible="true" width="47.365234375" x="0.8111743927001953" y="37.18513870239258">as300r3</y:NodeLabel>
           <y:SVGNodeProperties usingVisualBounds="false"/>
           <y:SVGModel svgBoundsPolicy="0">
             <y:SVGContent refid="1"/>
@@ -210,7 +210,7 @@
           <y:Geometry height="33.18513870239258" width="48.98758316040039" x="516.4816506372013" y="194.07214464181368"/>
           <y:Fill color="#CCCCFF" transparent="false"/>
           <y:BorderStyle color="#000000" type="line" width="1.0"/>
-          <y:NodeLabel alignment="center" autoSizePolicy="content" fontFamily="Dialog" fontSize="12" fontStyle="plain" hasBackgroundColor="false" hasLineColor="false" height="18.1328125" modelName="sandwich" modelPosition="s" textColor="#000000" visible="true" width="52.005859375" x="-1.5091381072998047" y="37.18513870239258">as300r2</y:NodeLabel>
+          <y:NodeLabel alignment="center" autoSizePolicy="content" fontFamily="Dialog" fontSize="12" fontStyle="plain" hasBackgroundColor="false" hasLineColor="false" height="18.701171875" modelName="sandwich" modelPosition="s" textColor="#000000" visible="true" width="47.365234375" x="0.8111743927001953" y="37.18513870239258">as300r2</y:NodeLabel>
           <y:SVGNodeProperties usingVisualBounds="false"/>
           <y:SVGModel svgBoundsPolicy="0">
             <y:SVGContent refid="1"/>
@@ -226,7 +226,7 @@
           <y:Geometry height="33.18513870239258" width="48.98758316040039" x="197.71256603569384" y="85.19471541701569"/>
           <y:Fill color="#CCCCFF" transparent="false"/>
           <y:BorderStyle color="#000000" type="line" width="1.0"/>
-          <y:NodeLabel alignment="center" autoSizePolicy="content" fontFamily="Dialog" fontSize="12" fontStyle="plain" hasBackgroundColor="false" hasLineColor="false" height="18.1328125" modelName="sandwich" modelPosition="s" textColor="#000000" visible="true" width="52.005859375" x="-1.5091381072998047" y="37.18513870239258">as200r1</y:NodeLabel>
+          <y:NodeLabel alignment="center" autoSizePolicy="content" fontFamily="Dialog" fontSize="12" fontStyle="plain" hasBackgroundColor="false" hasLineColor="false" height="18.701171875" modelName="sandwich" modelPosition="s" textColor="#000000" visible="true" width="47.365234375" x="0.8111743927001953" y="37.18513870239258">as200r1</y:NodeLabel>
           <y:SVGNodeProperties usingVisualBounds="false"/>
           <y:SVGModel svgBoundsPolicy="0">
             <y:SVGContent refid="1"/>
@@ -242,7 +242,7 @@
           <y:Geometry height="33.18513870239258" width="48.98758316040039" x="516.4816506372013" y="268.565576344168"/>
           <y:Fill color="#CCCCFF" transparent="false"/>
           <y:BorderStyle color="#000000" type="line" width="1.0"/>
-          <y:NodeLabel alignment="center" autoSizePolicy="content" fontFamily="Dialog" fontSize="12" fontStyle="plain" hasBackgroundColor="false" hasLineColor="false" height="18.1328125" modelName="sandwich" modelPosition="s" textColor="#000000" visible="true" width="52.005859375" x="-1.5091381072998047" y="37.18513870239258">as300r4</y:NodeLabel>
+          <y:NodeLabel alignment="center" autoSizePolicy="content" fontFamily="Dialog" fontSize="12" fontStyle="plain" hasBackgroundColor="false" hasLineColor="false" height="18.701171875" modelName="sandwich" modelPosition="s" textColor="#000000" visible="true" width="47.365234375" x="0.8111743927001953" y="37.18513870239258">as300r4</y:NodeLabel>
           <y:SVGNodeProperties usingVisualBounds="false"/>
           <y:SVGModel svgBoundsPolicy="0">
             <y:SVGContent refid="1"/>

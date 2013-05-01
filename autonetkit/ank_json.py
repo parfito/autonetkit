@@ -22,16 +22,17 @@ class AnkEncoder(json.JSONEncoder):
         if isinstance(obj, autonetkit.plugins.ipv4.TreeNode):
             #TODO: add documentation about serializing anm nodes
             return str(obj)
-        if isinstance(obj, autonetkit.anm.OverlayEdge):
+        if isinstance(obj, autonetkit.compiler.Domain):
             #TODO: add documentation about serializing anm nodes
-            log.warning("%s is anm overlay_edge. Use attribute rather than object in compiler." % obj)
             return str(obj)
-        if isinstance(obj, autonetkit.nidb.nidb_node_category):
-            #TODO: add documentation about serializing anm nodes
-            log.debug("%s is nidb nidb_node_category. Use attribute rather than object in compiler." % obj)
-            return str(obj)
-
-        
+        try:
+            if isinstance(obj, autonetkit.anm.overlay_edge):
+                #TODO: add documentation about serializing anm nodes
+                log.warning("%s is anm overlay_edge. Use attribute rather than object in compiler." % obj)
+                return str(obj)
+        except Exception, error:
+            print("except ank_json line 34: "+str(obj))  # parfait le lien 13-14 cause probleme
+            print("except ank_json line 35: "+str(error))
 
         return json.JSONEncoder.default(self, obj)
 

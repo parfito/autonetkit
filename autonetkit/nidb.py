@@ -12,48 +12,6 @@ try:
 except ImportError:
     import pickle
 
-class interface_data_dict(collections.MutableMapping):
-    """A dictionary which allows access as dict.key as well as dict['key']
-    Based on http://stackoverflow.com/questions/3387691
-    only allows read only acess
-    """
-
-    def __repr__(self):
-        return ", ".join(self.store.keys())
-
-    def __init__(self, data):
-#Note this won't allow updates in place
-        self.store = data
-        #self.data = parent[index]
-        #self.update(dict(*args, **kwargs)) # use the free update to set keys
-#TODO: remove duplicate of self.store and parent
-
-    def __getitem__(self, key):
-        return self.store[self.__keytransform__(key)]
-
-    def __setitem__(self, key, value):
-        self.store[key] = value # store locally
-
-    def __delitem__(self, key):
-        del self.store[self.__keytransform__(key)]
-
-    def __iter__(self):
-        return iter(self.store)
-
-    def __len__(self):
-        return len(self.store)
-
-    def __keytransform__(self, key):
-        return key
-
-    def __getattr__(self, key):
-        return self.store.get(key)
-
-#TODO: fix __setattr__ so doesn't cause recursion - and so doesn't silently not set values in compiler
-
-    def dump(self):
-        return self.store
-
 class overlay_data_dict(collections.MutableMapping):
     """A dictionary which allows access as dict.key as well as dict['key']
     Based on http://stackoverflow.com/questions/3387691
@@ -163,105 +121,9 @@ class overlay_interface(object):
         object.__setattr__(self, 'node_id', node_id)
         object.__setattr__(self, 'interface_id', interface_id)
 
-    def __repr__(self):
-        description = self.description or self.interface_id
-        return "(%s, %s)" % (self.node_id, description)
-
-    def __nonzero__(self):
-        """Allows for checking if node exists
-        """
-        return len(self._interface) > 0  # if interface data set
-
-    def __eq__(self, other):
-        return (self.node_id, self.interface_id) == (other.node_id, other.interface_id)
-
-    def __str__(self):
-        return self.__repr__()
-
-    @property
-    def _graph(self):
-        """Return graph the node belongs to"""
-        return self.nidb._graph
-
-    @property
-    def _node(self):
-        """Return graph the node belongs to"""
-        return self._graph.node[self.node_id]
-
-    @property
-    def _interface(self):
-        """Return graph the node belongs to"""
-        return self._node["_interfaces"][self.interface_id]
-
-    @property
-    def is_loopback(self):
-        """"""
-        return self.type == "loopback" or self.phy.type == "loopback"
-
-    @property
-    def is_physical(self):
-        """"""
-        return self.type == "physical" or self.phy.type == "physical"
-
-    @property
-    def description(self):
-        """"""
-        return self._interface.get("description")
-
-    @property
-    def is_loopback_zero(self):
-        # by convention, loopback_zero is at id 0
-        return self.interface_id == 0 and self.is_loopback
-
-    @property
-    def node(self):
-        """Returns parent node of this interface"""
-        return nidb_node(self.nidb, self.node_id)
-
-    def dump(self):
-        return str(self._interface.items())
-
-    def __getattr__(self, key):
-        """Returns interface property"""
-        try:
-            data = self._interface.get(key)
-        except KeyError:
-            return
-
-        if isinstance(data, dict):
-            return interface_data_dict(data)
-
-        return data
-
-    def get(self, key):
-        """For consistency, node.get(key) is neater 
-        than getattr(interface, key)"""
-        return getattr(self, key)
-
-    def __setattr__(self, key, val):
-        """Sets interface property"""
-        try:
-            self._interface[key] = val
-        except KeyError:
-            self.set(key, val)
-
-    def set(self, key, val):
-        """For consistency, node.set(key, value) is neater
-        than setattr(interface, key, value)"""
-        return self.__setattr__(key, val)
-
-    def edges(self):
-        """Returns all edges from node that have this interface ID
-        This is the convention for binding an edge to an interface"""
-        # edges have _interfaces stored as a dict of {node_id: interface_id, }
-        valid_edges = [e for e in self.node.edges()
-                if self.node_id in e._interfaces
-                and e._interfaces[self.node_id] == self.interface_id]
-        return valid_edges
-
 class overlay_edge_accessor(object):
 #TODO: do we even need this?
-    """API to access overlay edges in NIDB"""
+    """API to access overlay nodes in ANM"""
 #TODO: fix consistency between node_id (id) and edge (overlay edge)
     def __init__(self, nidb, edge):
 #Set using this method to bypass __setattr__ 
@@ -416,6 +278,7 @@ class nidb_node_category(object):
     @property
     def _category_data(self):
         try:
+            
             return self._node_data[self.category_id]
         except KeyError:
             log.debug("No category_id %s in node %s" % (self.category_id, self.node_id))
@@ -486,58 +349,6 @@ class nidb_node(object):
         except AttributeError:
             return self.node_id == other #TODO: check why comparing against strings - if in overlay graph...
 
-    def interface(self, key):
-        #TODO: also need to allow access interface for nidb and search on (node, interface id) tuple
-        return overlay_interface(self.nidb, self.node_id, key.interface_id)
-
-    @property
-    def _interfaces(self):
-        """Returns underlying interface dict"""
-        try:
-            return self._graph.node[self.node_id]["_interfaces"]
-        except KeyError:
-            log.debug("No interfaces initialised for %s" % self)
-            return 
-
-    @property
-    def _interface_ids(self):
-        return self._graph.node[self.node_id]["_interfaces"].keys()
-
-    @property
-    def interfaces(self):
-        return self.get_interfaces()
-
-    @property
-    def physical_interfaces(self):
-        return self.get_interfaces(type = "physical")
-
-    @property
-    def loopback_interfaces(self):
-        return self.get_interfaces(type = "loopback")
-
-    def get_interfaces(self, *args, **kwargs):
-        """Public function to view interfaces
-
-        Temporary function name until Compiler/NIDB/Templates
-        move to using "proper" interfaces"""
-        def filter_func(interface):
-            """Filter based on args and kwargs"""
-            return (
-                all(getattr(interface, key) for key in args) and
-                all(getattr(
-                    interface, key) == val for key, val in kwargs.items())
-            )
-
-        all_interfaces = iter(overlay_interface(self.nidb, 
-            self.node_id, interface_id)
-            for interface_id in self._interface_ids)
-        retval = (i for i in all_interfaces if filter_func(i))
-        return retval
-
-    @property
-    def loopback_zero(self):
-        return (i for i in self.interfaces if i.is_loopback_zero).next()
-
     @property
     def _graph(self):
         return self.nidb._graph
@@ -578,6 +389,7 @@ class nidb_node(object):
 
     @property
     def _node_data(self):
+        #print"node data: ", self.nidb._graph.node[self.node_id]
         return self.nidb._graph.node[self.node_id]
 
     def dump(self):
@@ -606,6 +418,65 @@ class nidb_node(object):
         ie not switch
         """
         return self.is_router or self.is_server
+
+    # parfait
+    @property
+    def is_webServer(self):
+        """Either from this graph or the physical graph"""
+        for dv_subtype in self.device_subtype.split('_'):
+            if dv_subtype == "WS" :
+                return True;
+        for dv_subtype in self.phy.device_subtype.split('_'):
+            if dv_subtype == "WS" :
+                return True;
+        return False
+
+    @property
+    def is_DNSNode(self):
+        """Either from this graph or the physical graph"""
+        return self.is_DNSResolver or self.is_nameServer or self.is_rootServer
+
+    @property
+    def is_client(self):
+        """Either from this graph or the physical graph"""
+        for dv_subtype in self.device_subtype.split('_'):
+            if dv_subtype == "CL" :
+                return True;
+        for dv_subtype in self.phy.device_subtype.split('_'):
+            if dv_subtype == "CL" :
+                return True;
+        return False                
+    @property
+    def is_DNSResolver(self):
+        """Either from this graph or the physical graph"""
+        for dv_subtype in self.device_subtype.split('_'):
+            if dv_subtype == "DNSR" :
+                return True;
+        for dv_subtype in self.phy.device_subtype.split('_'):
+            if dv_subtype == "DNSR" :
+                return True;
+        return False              
+ 
+    @property
+    def is_rootServer(self):
+        """Either from this graph or the physical graph"""
+        for dv_subtype in self.device_subtype.split('_'):
+            if dv_subtype == "RS" :
+                return True;
+        for dv_subtype in self.phy.device_subtype.split('_'):
+            if dv_subtype == "RS" :
+                return True;
+        return False
+    @property
+    def is_nameServer(self):
+        """Either from this graph or the physical graph"""
+        for dv_subtype in self.device_subtype.split('_'):
+            if dv_subtype == "NS" :
+                return True;
+        for dv_subtype in self.phy.device_subtype.split('_'):
+            if dv_subtype == "NS" :
+                return True;
+        return False
 
     def edges(self, *args, **kwargs):
         #TODO: want to add filter for *args and **kwargs here too
@@ -744,7 +615,7 @@ class NIDB_base(object):
                 pprint.pformat(self._graph.edges(data=True))
                 )
 
-    def save(self, timestamp = True, use_gzip = True):
+    def save(self):
         import os
         import gzip
         archive_dir = os.path.join("versions", "nidb")
@@ -753,19 +624,11 @@ class NIDB_base(object):
 
         data = ank_json.ank_json_dumps(self._graph)
 #TODO: should this use the ank_json.jsonify_nidb() ?
-        if timestamp:
-            json_file = "nidb_%s.json.gz" % self.timestamp
-        else:
-            json_file = "nidb.json"
+        json_file = "nidb_%s.json.gz" % self.timestamp
         json_path = os.path.join(archive_dir, json_file)
         log.debug("Saving to %s" % json_path)
-        if use_gzip:
-            with gzip.open(json_path, "wb") as json_fh:
-                json_fh.write(data)
-        else:
-            with open(json_path, "wb") as json_fh:
-                json_fh.write(data)
-
+        with gzip.open(json_path, "wb") as json_fh:
+            json_fh.write(data)
 
     def restore_latest(self, directory = None):
         import os
@@ -807,6 +670,7 @@ class NIDB_base(object):
             node.graphics.device_type = graphics_node.device_type
             node.graphics.device_subtype = graphics_node.device_subtype
             node.device_type = graphics_node.device_type
+            #print("device type::  ", node.device_type)
             node.device_subtype = graphics_node.device_subtype
 
     def __len__(self):
@@ -864,6 +728,7 @@ class NIDB_base(object):
 
     @property
     def data(self):
+        #print("nidb data: ",nidb_graph_data(self))
         return nidb_graph_data(self)
 
     def update(self, nbunch, **kwargs):
@@ -876,10 +741,15 @@ class NIDB_base(object):
         if len(args) or len(kwargs):
             result = self.filter(result, *args, **kwargs)
         return result
-
+#
     def routers(self, *args, **kwargs):
         """Shortcut for nodes(), sets device_type to be router"""
         kwargs['device_type'] = 'router'
+        print("kwargs: ",kwargs)
+        return self.nodes(*args, **kwargs)
+    def servers(self, *args, **kwargs):
+        """Shortcut for nodes(), sets device_type to be server"""
+        kwargs['device_type'] = 'server'
         return self.nodes(*args, **kwargs)
 
     def filter(self, nbunch = None, *args, **kwargs):
@@ -889,11 +759,12 @@ class NIDB_base(object):
         if not nbunch:
             nbunch = self.nodes()
         def filter_func(node):
+            
             return (
                     all(getattr(node, key) for key in args) and
                     all(getattr(node, key) == val for key, val in kwargs.items())
                     )
-
+        
         return (n for n in nbunch if filter_func(n))
 
     def add_nodes_from(self, nbunch, retain=[], **kwargs):
@@ -904,7 +775,8 @@ class NIDB_base(object):
             pass # already a list
 
         nbunch = list(nbunch)
-        nodes_to_add = nbunch # retain for interface copying
+        nbunch_in = nbunch
+        
 
         if len(retain):
             add_nodes = []
@@ -916,11 +788,10 @@ class NIDB_base(object):
             log.warn("Cannot add node ids directly to NIDB: must add overlay nodes")
         self._graph.add_nodes_from(nbunch, **kwargs)
 
-        for node in nodes_to_add:
-            #TODO: add an interface_retain for attributes also
-            int_dict = {i.interface_id: {'type': i.type, 'layer': i.overlay_id} for i in node.interfaces()}
-            int_dict = {i.interface_id: {'type': i.type} for i in node.interfaces()}
-            self._graph.node[node.node_id]["_interfaces"] = int_dict
+        for n in nbunch_in:
+            interfaces = dict((interface.id, {"type": interface.type, "description": interface.description})
+                    for interface in n.interfaces())
+            self._graph.node[n.node_id]['_interfaces'] = interfaces
 
     def add_edge(self, src, dst, retain=[], **kwargs):
         self.add_edges_from([(src, dst)], retain, **kwargs)
@@ -932,8 +803,6 @@ class NIDB_base(object):
             retain = [retain] # was a string, put into list
         except AttributeError:
             pass # already a list
-
-        edges_to_add = ebunch # retain for interface copying
 
         #TODO: need to test if given a (id, id) or an edge overlay pair... use try/except for speed
         try:
@@ -950,9 +819,6 @@ class NIDB_base(object):
 
         #TODO: decide if want to allow nodes to be created when adding edge if not already in graph
         self._graph.add_edges_from(ebunch, **kwargs)
-        for edge in edges_to_add:
-            # copy across interface bindings
-            self._graph[edge.src.node_id][edge.dst.node_id]['_interfaces'] = edge._interfaces
 
     def __iter__(self):
         return iter(nidb_node(self, node)
@@ -962,6 +828,7 @@ class lab_topology_accessor(object):
     """API to access overlay graphs in ANM"""
     def __init__(self, nidb):
 #Set using this method to bypass __setattr__ 
+        
         object.__setattr__(self, 'nidb', nidb)
 
     @property
@@ -1025,3 +892,39 @@ class overlay_subgraph(NIDB_base):
         self._name = name
     def __repr__(self):
         return "nidb: %s" % self._name
+
+
+class Domain(object):
+
+    def __init__(self, name):
+        self.name = name
+        self.nameservers = []  # take a node value, is a list because it cane get several name server
+        self.webServers = []  # take a list of node
+        self.clients = []
+    
+    def setNameServer(self, node):
+        self.nameServer.append(node)
+        return
+    
+    def setWebServer(self, node):
+        self.webServer.append(node)
+        return
+    
+    def setClient(self, node):
+        self.clients.append(node)
+        return
+    
+    def getWebServer(self):
+        return self.webServers
+    
+    def getNameServer(self):
+        return self.nameServers
+    
+    def getName(self):
+        return self.Name
+    
+    def gotNameServer(self):
+        """return true if the domain got at least one dns server"""
+        if len(self.nameservers) == 0:
+            return False
+        return True

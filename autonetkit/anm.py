@@ -12,8 +12,10 @@ try:
 except ImportError:
     import pickle
 
+
 class AutoNetkitException(Exception):
     pass
+
 
 class OverlayNotFound(AutoNetkitException):
     def __init__(self, errors):
@@ -22,7 +24,7 @@ class OverlayNotFound(AutoNetkitException):
     def __str__(self):
         return "Overlay %s not found" % self.Errors
 
-#TODO: rename to OverlayInterface
+
 class overlay_interface(object):
     def __init__(self, anm, overlay_id, node_id, interface_id):
         object.__setattr__(self, 'anm', anm)
@@ -34,20 +36,10 @@ class overlay_interface(object):
         description = self.description or self.interface_id
         return "(%s, %s)" % (self.node_id, description)
 
-    def __eq__(self, other):
-        return (self.node_id, self.interface_id) == (other.node_id, other.interface_id)
-
     def __nonzero__(self):
+        """Allows for checking if node exists
+        """
         return len(self._interface) > 0  # if interface data set
-
-    def __lt__(self, other):
-        #TODO: check how is comparing the nodes
-        return ((self.node, self.interface_id) < (other.node, other.interface_id))
-
-    @property
-    def is_bound(self):
-        """Returns if this interface is bound to an edge on this layer"""
-        return len(self.edges()) > 0
 
     def __str__(self):
         return self.__repr__()
@@ -59,48 +51,25 @@ class overlay_interface(object):
 
     @property
     def _node(self):
-        """Return graph data the node belongs to"""
+        """Return graph the node belongs to"""
         return self._graph.node[self.node_id]
 
     @property
     def _interface(self):
-        """Return data dict for the interface"""
+        """Return graph the node belongs to"""
         return self._node["_interfaces"][self.interface_id]
 
     @property
     def phy(self):
-        # check overlay requested exists
         if self.overlay_id == "phy":
             return self
-        return overlay_interface(self.anm, 'phy', 
+        return overlay_interface(self.anm, 'phy',
                 self.node_id, self.interface_id)
-
-    def __getitem__(self, overlay_id):
-        """Returns corresponding interface in specified overlay"""
-        if not self.anm.has_overlay(overlay_id):
-            log.warning("Trying to access interface %s for non-existent overlay %s"
-                    % (self, overlay_id))
-            return None
-
-        if not self.node_id in self.anm.overlay_nx_graphs[overlay_id]:
-            log.debug("Trying to access interface %s for non-existent node %s in overlay %s" 
-                    % (self, self.node_id, self.overlay_id))
-            return None
-
-        try:
-            return overlay_interface(self.anm, overlay_id, self.node_id, self.interface_id)
-        except KeyError:
-            return
 
     @property
     def is_loopback(self):
         """"""
         return self.type == "loopback" or self.phy.type == "loopback"
-
-    @property
-    def is_physical(self):
-        """"""
-        return self.type == "physical" or self.phy.type == "physical"
 
     @property
     def description(self):
@@ -111,28 +80,6 @@ class overlay_interface(object):
 
         if self.overlay_id != "phy":  # prevent recursion
             self.phy._interface.get("description")
-
-    @property
-    def is_loopback_zero(self):
-        return self.interface_id == 0 and self.is_loopback
-
-    @property
-    def type(self):
-        """"""
-#TODO: make 0 correctly access interface 0 -> copying problem
-# TODO: this needs a bugfix rather than the below hard-coded workaround
-        if self.interface_id == 0:
-            return "loopback"
-
-        if self.overlay_id != "phy":  # prevent recursion
-            return self.phy._interface.get("type")
-
-        retval = self._interface.get("type")
-        if retval:
-            return retval
-
-        if self.overlay_id != "phy":  # prevent recursion
-            return self.phy._interface.get("type")
 
     @property
     def node(self):
@@ -169,11 +116,10 @@ class overlay_interface(object):
     def edges(self):
         """Returns all edges from node that have this interface ID
         This is the convention for binding an edge to an interface"""
-        # edges have _interfaces stored as a dict of {node_id: interface_id, }
-        valid_edges = [e for e in self.node.edges()
-                if self.node_id in e._interfaces
-                and e._interfaces[self.node_id] == self.interface_id]
+        valid_edges = [e for e in self.node.edges(
+        ) if self.interface_id in e._interfaces]
         return valid_edges
+
 
 @functools.total_ordering
 class OverlayNode(object):
@@ -192,8 +138,7 @@ class OverlayNode(object):
         return self.node_id in self._graph
 
     def __iter__(self):
-        """Shortcut to iterate over the physical interfaces of this node"""
-        return self.interfaces(type="physical")
+        return self.interfaces()
 
     def __getnewargs__(self):
         return ()
@@ -214,18 +159,6 @@ class OverlayNode(object):
             return self.node_id == other.node_id
         except AttributeError:
             return self.node_id == other
-
-    @property
-    def loopback_zero(self):
-        return (i for i in self.interfaces("is_loopback_zero")).next()
-
-    @property
-    def physical_interfaces(self):
-        return self.interfaces(type = "physical")
-
-    @property
-    def loopback_interfaces(self):
-        return self.interfaces(type = "loopback")
 
     def __lt__(self, other):
 # want [r1, r2, ..., r11, r12, ..., r21, r22] not [r1, r11, r12, r2, r21, r22]
@@ -258,10 +191,10 @@ class OverlayNode(object):
                 return int_id
 
     # TODO: interface function access needs to be cleaned up
-    def _add_interface(self, description=None, type="physical", **kwargs):
+    def _add_interface(self, type="physical", description=None, **kwargs):
         data = dict(kwargs)
 
-        if self.overlay_id != 'phy' and self.phy:
+        if self.node_id != 'phy' and self.phy:
             next_id = self.phy._next_int_id
             self.phy._interfaces[next_id] = {'type': type,
                                              'description': description} 
@@ -280,7 +213,7 @@ class OverlayNode(object):
     def add_interface(self, **kwargs):
         """Public function to add interface"""
         interface_id = self._add_interface(**kwargs)
-        return overlay_interface(self.anm, self.overlay_id, 
+        return overlay_interface(self.anm, self.overlay_id,
                 self.node_id, interface_id)
 
     def interfaces(self, *args, **kwargs):
@@ -304,7 +237,7 @@ class OverlayNode(object):
         """Returns interface based on interface id"""
         try:
             if key.interface_id in self._interface_ids:
-                return overlay_interface(self.anm, self.overlay_id, 
+                return overlay_interface(self.anm, self.overlay_id,
                         self.node_id, key.interface_id)
         except AttributeError:
             log.warning("Unable to find interface %s in %s " % (key, self))
@@ -360,6 +293,88 @@ class OverlayNode(object):
         """
         return self.is_router or self.is_server
 
+    # parfait
+    @property
+    def is_webServer(self):
+        """Either from this graph or the physical graph"""
+        for dv_subtype in self.device_subtype.split('_'):
+            if dv_subtype == "WS" :
+                return True;
+        for dv_subtype in self.phy.device_subtype.split('_'):
+            if dv_subtype == "WS" :
+                return True;
+        return False
+
+    @property
+    def is_DNSNode(self):
+        """Either from this graph or the physical graph"""
+        return self.is_DNSResolver or self.is_nameServer or self.is_rootServer
+
+    @property
+    def is_client(self):
+        """Either from this graph or the physical graph"""
+        for dv_subtype in self.device_subtype.split('_'):
+            if dv_subtype == "CL" :
+                return True;
+        for dv_subtype in self.phy.device_subtype.split('_'):
+            if dv_subtype == "CL" :
+                return True;
+        return False                
+    @property
+    def is_DNSResolver(self):
+        """Either from this graph or the physical graph"""
+        for dv_subtype in self.device_subtype.split('_'):
+            if dv_subtype == "DNSR" :
+                return True;
+        for dv_subtype in self.phy.device_subtype.split('_'):
+            if dv_subtype == "DNSR" :
+                return True;
+        return False              
+ 
+    @property
+    def is_rootServer(self):
+        """Either from this graph or the physical graph"""
+        for dv_subtype in self.device_subtype.split('_'):
+            if dv_subtype == "RS" :
+                return True;
+        for dv_subtype in self.phy.device_subtype.split('_'):
+            if dv_subtype == "RS" :
+                return True;
+        return False
+    @property
+    def is_nameServer(self):
+        """Either from this graph or the physical graph"""
+        for dv_subtype in self.device_subtype.split('_'):
+            if dv_subtype == "NS" :
+                return True;
+        for dv_subtype in self.phy.device_subtype.split('_'):
+            if dv_subtype == "NS" :
+                return True;
+        return False
+
+#    @property
+#    def domain(self):
+#        g_dns = self['dns']
+#        for node in g_dns.nodes():
+#            dom=str(node.get("domain"))
+#            #creation de l'attribut domaine du noeud
+#            node.domain=dom
+#            
+#            node.name=node.get("name")
+#            node.level=node.get("Level")
+#        
+#            
+#            if dom!= None and dom!="":
+#                domain.add(dom)
+    
+
+#    @property
+#    def DSNResolver(self):
+#        """Either from this graph or the physical graph"""
+#        dns_label = self.get("DNSResolver")
+#        dns_reslover = 
+#        return self.device_subtype.count('NS') > 0 or self.phy.device_subtype.count('NS') > 0 
+
     def __getitem__(self, key):
         """Get item key"""
         return OverlayNode(self.anm, key, self.node_id)
@@ -391,15 +406,6 @@ class OverlayNode(object):
         """Returns neighbors of node"""
         neighs = self._overlay.neighbors(self)
         return self._overlay.filter(neighs, *args, **kwargs)
-
-    def neighbor_interfaces(self, *args, **kwargs):
-        #TODO: implement filtering for args and kwargs
-        if len(args) or len(kwargs):
-            log.warning("Attribute-based filtering not currently supported" 
-                    " for neighbor_interfaces")
-
-        return iter(edge.dst_int for edge in self.edges())
-
 
     @property
     def label(self):
@@ -471,12 +477,6 @@ class OverlayEdge(object):
         object.__setattr__(self, 'src_id', src_id)
         object.__setattr__(self, 'dst_id', dst_id)
 
-    def __eq__(self, other):
-        try:
-            return (self.src_id, self.dst_id) == (other.src_id, other.dst_id)
-        except AttributeError:
-            return self.node_id == other
-
     def __repr__(self):
         """String of node"""
         return "%s: (%s, %s)" % (self.overlay_id, self.src, self.dst)
@@ -493,7 +493,7 @@ class OverlayEdge(object):
         return (self.anm, self.overlay_id, self.src_id, self.dst_id)
 
     def __lt__(self, other):
-        return ((self.src.node_id, self.dst.node_id) < (other.src.node_id, 
+        return ((self.src.node_id, self.dst.node_id) < (other.src.node_id,
             other.dst.node_id))
 
     def __setstate__(self, state):
@@ -514,18 +514,6 @@ class OverlayEdge(object):
     def dst(self):
         """Destination node of edge"""
         return OverlayNode(self.anm, self.overlay_id, self.dst_id)
-
-    @property
-    def src_int(self):
-        """Interface bound to source node of edge"""
-        src_int_id = self._interfaces[self.src_id]
-        return overlay_interface(self.anm, self.overlay_id, self.src_id, src_int_id) 
-
-    @property
-    def dst_int(self):
-        """Interface bound to destination node of edge"""
-        dst_int_id = self._interfaces[self.dst_id]
-        return overlay_interface(self.anm, self.overlay_id, self.dst_id, dst_int_id) 
 
     def attr_equal(self, *args):
         """Return edges which both src and dst have attributes equal"""
@@ -553,11 +541,6 @@ class OverlayEdge(object):
     def bind_interface(self, node, interface):
         """Bind this edge to specified index"""
         self._interfaces[node.id] = interface
-
-    def interfaces(self):
-        #TODO: warn if interface doesn't exist on node
-        return iter(overlay_interface(self.anm, self.overlay_id, node_id, interface_id) 
-                for (node_id, interface_id) in self._interfaces.items())
 
     @property
     def _graph(self):
@@ -629,10 +612,6 @@ class OverlayBase(object):
     def __contains__(self, n):
         return n.node_id in self._graph
 
-    def interface(self, interface):
-        return overlay_interface(self._anm, self._overlay_id,
-                interface.node_id, interface.interface_id)
-
     def edge(self, edge_to_find, dst_to_find=None):
         """returns edge in this graph with same src and same edge_id"""
         try:
@@ -643,7 +622,7 @@ class OverlayBase(object):
             if self._graph.has_edge(src, dst):
                 return OverlayEdge(self._anm, self._overlay_id, src, dst)
         except AttributeError:
-            pass # not strings
+            pass  # not strings
         except TypeError:
             pass
 
@@ -709,8 +688,7 @@ class OverlayBase(object):
         return self._graph.has_edge(edge.src, edge.dst)
 
     def __iter__(self):
-        return iter(OverlayNode(self._anm, self._overlay_id, node)
-                    for node in self._graph)
+        return iter(OverlayNode(self._anm, self._overlay_id, node) for node in self._graph)
 
     def __len__(self):
         return len(self._graph)
@@ -724,6 +702,10 @@ class OverlayBase(object):
     def routers(self, *args, **kwargs):
         """Shortcut for nodes(), sets device_type to be router"""
         kwargs['device_type'] = 'router'
+        return self.nodes(*args, **kwargs)
+    def servers(self, *args, **kwargs):
+        """Shortcut for nodes(), sets device_type to be server"""
+        kwargs['device_type'] = 'server'
         return self.nodes(*args, **kwargs)
 
     def device(self, key):
@@ -818,7 +800,7 @@ class OverlaySubgraph(OverlayBase):
 
 class OverlayGraph(OverlayBase):
     """API to interact with an overlay graph in ANM"""
-
+    
     @property
     def anm(self):
         return self._anm
@@ -902,7 +884,6 @@ class OverlayGraph(OverlayBase):
                     'description': None,
                     'type': 'physical',
                 }
-                # need to do dict() to copy, otherwise all point to same memory location -> clobber
                 data = dict(
                     (key, dict(interface_data)) for key in phy_interfaces)
                 self._graph.node[node]['_interfaces'] = data
@@ -911,24 +892,20 @@ class OverlayGraph(OverlayBase):
                 log.debug("Initialise interfaces for %s in %s" % (
                     node, self._overlay_id))
                 self._graph.node[node]['_interfaces'] = {0:
-                                                         {'description': 'loopback',
-                                                             'type': 'loopback'}}
+                                                         {'description': 
+                                                             'loopback'}}
 
     def allocate_interfaces(self):
         """allocates edges to interfaces"""
         # int_counter = (n for n in itertools.count() if n not in
         self._init_interfaces()
 
-        def numeric_id(edge):
-            return int(edge.edge_id.split("_")[0])
-
-        ebunch = sorted(self.edges(), key = numeric_id)
-
+        ebunch = (e for e in self.edges())
         for edge in ebunch:
             src = edge.src
             dst = edge.dst
-            src_int_id = src._add_interface('%s to %s' % (src, dst))
-            dst_int_id = dst._add_interface('%s to %s' % (dst, src))
+            src_int_id = src._add_interface('link to %s' % dst)
+            dst_int_id = dst._add_interface('link to %s' % src)
             edge._interfaces = {}
             edge._interfaces[src.id] = src_int_id
             edge._interfaces[dst.id] = dst_int_id
@@ -994,7 +971,8 @@ class OverlayGraph(OverlayBase):
             else:
                 ebunch = [(e.src.node_id, e.dst.node_id, {}) for e in ebunch]
         except AttributeError:
-            ebunch = [(src.node_id, dst.node_id, {"_interfaces": {}}) for src, dst in ebunch]
+            data = {"_interfaces": {}}
+            ebunch = [(src.node_id, dst.node_id, data) for src, dst in ebunch]
 
         ebunch = [(src, dst, data) for (src, dst, data)
                   in ebunch if src in self._graph and dst in self._graph]
@@ -1007,7 +985,7 @@ class OverlayGraph(OverlayBase):
 
     def update(self, nbunch=None, **kwargs):
         """Sets property defined in kwargs to all nodes in nbunch"""
-        if nbunch is None:
+        if not nbunch:
             nbunch = self.nodes()
         for node in nbunch:
             for key, value in kwargs.items():
@@ -1023,7 +1001,7 @@ class OverlayGraph(OverlayBase):
 
     def subgraph(self, nbunch, name=None):
         nbunch = (n.node_id for n in nbunch)  # only store the id in overlay
-        return OverlaySubgraph(self._anm, self._overlay_id, 
+        return OverlaySubgraph(self._anm, self._overlay_id,
                 self._graph.subgraph(nbunch), name)
 
 
@@ -1038,9 +1016,6 @@ class AbstractNetworkModel(object):
         self._build_node_label()
         self.timestamp = time.strftime("%Y%m%d_%H%M%S", time.localtime())
 
-    def __repr__(self):
-        return "ANM %s" % self.timestamp
-
     @staticmethod
     def __getnewargs__():
         return ()
@@ -1052,9 +1027,6 @@ class AbstractNetworkModel(object):
     @property
     def overlay_nx_graphs(self):
         return self._overlays
-
-    def has_overlay(self, overlay_id):
-        return overlay_id in self._overlays
 
     def __setstate__(self, state):
         """For pickling"""
@@ -1119,7 +1091,7 @@ class AbstractNetworkModel(object):
         g_in = self.add_overlay("input", graph=graph, directed=False)
         g_graphics = self['graphics']
         g_graphics.add_nodes_from(g_in, retain=['x', 'y', 'device_type',
-                                                'device_subtype', 'pop', 
+                                                'device_subtype', 'pop',
                                                 'asn'])
 
         return g_in
@@ -1210,3 +1182,40 @@ class AbstractNetworkModel(object):
         debug_data = dict(((graph.node_label(src), graph.node_label(dst)),
             data) for src, dst, data in (graph._graph.edges(data=True)))
         return pprint.pformat(debug_data)
+
+class Domain(object):
+
+    def __init__(self, name):
+        self.name = name
+        self.nameservers = []  # take a node value, is a list because it cane get several name server
+        self.webServers = []  # take a list of node
+        self.clients = []
+    
+    def setNameServer(self, node):
+        self.nameServer.append(node)
+        return
+    
+    def setWebServer(self, node):
+        self.webServer.append(node)
+        return
+    
+    def setClient(self, node):
+        self.clients.append(node)
+        return
+    
+    def getWebServer(self):
+        return self.webServers
+    
+    def getNameServer(self):
+        return self.nameServers
+    
+    def getName(self):
+        return self.Name
+    
+    def gotNameServer(self):
+        """return true if the domain got at least one dns server"""
+        if len(self.nameservers) == 0:
+            return False
+        return True
+
+

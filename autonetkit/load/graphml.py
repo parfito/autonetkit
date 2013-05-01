@@ -33,7 +33,12 @@ def load_graphml(input_data):
             except IndexError:
                 raise autonetkit.exception.AnkIncorrectFileFormat
         else:
-            raise e
+            try:
+                import autonetkit.console_script as cs
+                input_data=cs.parse_options().file
+                graph = nx.read_graphml(input_data)
+            except IOError:
+                raise e
 
     # remove selfloops
     graph.remove_edges_from(edge for edge in graph.selfloop_edges())

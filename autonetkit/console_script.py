@@ -60,10 +60,6 @@ def manage_network(input_graph_string, timestamp, build_options, reload_build=Fa
             body = ank_json.dumps(anm)
             messaging.publish_compressed("www", "client", body)
 
-    if build_options['validate']:
-        import validate
-        validate.validate(anm)
-
     if build_options['compile']:
         if build_options['archive']:
             anm.save()
@@ -135,8 +131,8 @@ def parse_options():
                         default=False, help="Compile")
     parser.add_argument(
         '--build', action="store_true", default=False, help="Build")
-    parser.add_argument('--render', action="store_true", default=False, help="Compile")
-    parser.add_argument('--validate', action="store_true", default=False, help="Validate")
+    parser.add_argument('--render', action="store_true",
+                        default=False, help="Compile")
     parser.add_argument('--deploy', action="store_true",
                         default=False, help="Deploy")
     parser.add_argument('--archive', action="store_true", default=False,
@@ -145,6 +141,14 @@ def parse_options():
                         default=False, help="Measure")
     parser.add_argument('--webserver', action="store_true", default=False, help="Webserver")
     parser.add_argument('--grid', type=int, help="Webserver")
+    parser.add_argument('--lbt', type=int,
+                        help="load balancing type is cyclic by default")
+    parser.add_argument('--nsttl', type=int,
+                        help="name server ttl is 8000 by default")
+    parser.add_argument('--wsttl', type=int,
+                        help="web server ttl is 80 by default")
+    parser.add_argument('--clttl', type=int,
+                        help="client ttl is 8000 by default")
     arguments = parser.parse_args()
     return arguments
 
@@ -166,15 +170,17 @@ def main():
     build_options = {
         'compile': options.compile or settings['General']['compile'],
         'render': options.render or settings['General']['render'],
-        'validate': options.validate or settings['General']['validate'],
         'build': options.build or settings['General']['build'],
         'deploy': options.deploy or settings['General']['deploy'],
         'measure': options.measure or settings['General']['measure'],
         'monitor': options.monitor or settings['General']['monitor'],
         'diff': options.diff or settings['General']['diff'],
         'archive': options.archive or settings['General']['archive'],
+        'loadBalType': options.lbt or settings['General']['loadBalType'],
+        'NSTTL': options.nsttl or settings['General']['NSTTL'],      
+        'WSTTL': options.wsttl or settings['General']['WSTTL'],      
+        'CLTTL': options.clttl or settings['General']['CLTTL'],      
     }
-
 
     if options.webserver:
         log.info("Webserver not yet supported, please run as seperate module")
@@ -239,20 +245,23 @@ def main():
 def compile_network(anm):
     nidb = NIDB()
     g_phy = anm['phy']
-    g_ip = anm['ip']
+    g_in=anm['input']
+    g_ipv4 = anm['ipv4']
+    g_dns=anm['dns']
     g_graphics = anm['graphics']
 # TODO: build this on a platform by platform basis
     nidb.add_nodes_from(
-        g_phy, retain=['label', 'host', 'platform', 'Network', 'update'])
+        g_in, retain=['label', 'host', 'platform', 'Network', 'update','level','domain','device_subtype','DNSResolver','device_type','name'])
 
-    cd_nodes = [n for n in g_ip.nodes(
+    cd_nodes = [n for n in g_ipv4.nodes(
         "collision_domain") if not n.is_switch]  # Only add created cds - otherwise overwrite host of switched
     nidb.add_nodes_from(
         cd_nodes, retain=['label', 'host'], collision_domain=True)
 # add edges to switches
-    edges_to_add = [edge for edge in g_phy.edges()
-            if edge.src.is_switch or edge.dst.is_switch]
-    edges_to_add += [edge for edge in g_ip.edges() if edge.split] # cd edges from split
+    edges_to_add = [edge for edge in g_phy.edges(
+    ) if edge.src.is_switch or edge.dst.is_switch]
+    edges_to_add += [edge for edge in g_ipv4.edges(
+    ) if edge.src.collision_domain or edge.dst.collision_domain]
     nidb.add_edges_from(edges_to_add, retain='edge_id')
 
 # TODO: boundaries is still a work in progress...
@@ -288,10 +297,6 @@ def deploy_network(anm, nidb, input_graph_string):
     deploy_hosts = config.settings['Deploy Hosts']
     for hostname, host_data in deploy_hosts.items():
         for platform, platform_data in host_data.items():
-            if not any(nidb.nodes(host=hostname, platform=platform)):
-                log.debug("No hosts for (host, platform) (%s, %s), skipping deployment"
-                        % (hostname, platform))
-                continue
 
             if not platform_data['deploy']:
                 log.debug("Not deploying to %s on %s" % (platform, hostname))
