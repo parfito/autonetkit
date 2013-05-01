@@ -51,9 +51,11 @@ zone "${domain.name}" {
 	% endif
 };
 % endfor
+%if node.loadBalancingType == 1 :
+rrset-order { order cyclic; };
+%elif node.loadBalancingType == 2:
+rrset-order { order random; };
 %endif
-##% import autonetkit.console_script as cs
-##% loadBalancingType = cs.parse_options().loadBalType
-##rrset-order { order ${loadBalancingType}; };
+%endif
 
 include "/etc/bind/named.conf.local";

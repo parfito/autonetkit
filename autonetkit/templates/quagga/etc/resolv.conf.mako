@@ -1,4 +1,6 @@
 %if node.is_client:
 nameserver ${node.DNSResolverIpv4}
-domain ${node.Domain}
+	%if node.domain is not None:
+domain ${node.domain}
+	%endif
 %endif

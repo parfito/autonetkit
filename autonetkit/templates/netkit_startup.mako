@@ -6,6 +6,13 @@ route del default
 /etc/init.d/ssh start
 /etc/init.d/hostname.sh 
 /etc/init.d/zebra start
+%if node.is_nameServer or node.is_DNSResolver or node.is_rootServer : 
+/etc/init.d/bind start
+% endif 
+%if node.is_webServer : 
+/etc/init.d/apache2 start
+% endif 
+
 % if node.ssh.use_key:
 chown -R root:root /root     
 chmod 755 /root

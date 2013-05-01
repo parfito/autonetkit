@@ -25,7 +25,4 @@ def is_client(string):
     return False                
 
 if __name__ == '__main__':
-    from mako.template import Template
-
-    mytemplate = Template(filename='hostname.mako')
-    print mytemplate.render()
+    print(is_DNSResolver("DNSR"))

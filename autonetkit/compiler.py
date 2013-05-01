@@ -565,13 +565,9 @@ class NetkitCompiler(PlatformCompiler):
     def compile(self):
         log.info("Compiling Netkit for %s" % self.host)
         g_phy = self.anm['phy']
-        g_dns=self.anm['dns']
         quagga_compiler = QuaggaCompiler(self.nidb, self.anm)
 # TODO: this should be all l3 devices not just routers
         for phy_node in g_phy.nodes('is_router', host=self.host, syntax='quagga'):
-            
-            phy_node=g_phy.node(phy_node)
-                            
             folder_name = naming.network_hostname(phy_node)
             nidb_node = self.nidb.node(phy_node)
             nidb_node.render.base = "templates/quagga"
@@ -606,17 +602,10 @@ class NetkitCompiler(PlatformCompiler):
         
         # ------------construction du dns pour le nidb    
         for phy_node in g_phy.nodes('is_router', host=self.host, syntax='quagga'):
-            if phy_node in g_dns.nodes():
-                nidb_node = self.nidb.node(g_dns.node(phy_node.id))
-                print nidb_node.get("domain")
-#                if g_dns.node(phy_node.id).rootNS !=None:
-#                    nidb_node.RNS=g_dns.node(phy_node.id).rootNS
-#                    nidb_node.RNS_name=nidb_node.RNS.name
-                
-            # seuls les noeud CL, NS, RS, DNSR et WS sont concernes
+            nidb_node = self.nidb.node(phy_node)
+            if nidb_node in self.anm['dns']: # seuls les noeud CL, NS, RS, DNSR et WS sont concernes
                 self.dns(nidb_node)
         # and lab.conf
-        
         self.allocate_tap_ips()
         self.lab_topology()
 
@@ -633,7 +622,7 @@ class NetkitCompiler(PlatformCompiler):
                 phy_node = g_phy.node(n)
                 try :   # le noeud cd_12_6 peut causer de problemes
                     if phy_node.is_rootServer:
-                        node.RNS_ipv4 = self.nidb.node(phy_node.id).interfaces[0].ipv4_address
+                        node.RNS_ipv4 = self.nidb.node(phy_node).interfaces[0].ipv4_address
                         node.RNS_name = n.name
                         break
                 except AttributeError, error:
@@ -646,34 +635,32 @@ class NetkitCompiler(PlatformCompiler):
                 node.domains = [] # ce generateur contiendra seulement un seul domaine, celui de ce ce nameServer
                 name = node.domain
                 nameServerName = node.name
-                nameServerIPv4_address = self.nidb.node(node.id).interfaces[0].ipv4_address
+                nameServerIPv4_address = self.nidb.node(node).interfaces[0].ipv4_address
                 #cree un domaine portant son nom
                 domain = Domain(name, nameServerName, nameServerIPv4_address)
                 # on va recuperer tous les noeud qui sont clients de ce domain 
+                import autonetkit.console_script as cs 
                 for n in g_ipv4.nodes(): 
-                    phy_node = g_phy.node(n.id)
-                    dns_node=g_dns.node(n.id)
-                    
+                    phy_node = g_phy.node(n)
                     try :   # le noeud cd_12_6 peut causer de problemes
-                        if dns_node.get("domain") == node.domain :
-                            
+                        if phy_node.get("domain") == node.domain :
                             name = phy_node.get("name")
-                            address = self.nidb.node(phy_node.id).interfaces[0].ipv4_address
+                            address = self.nidb.node(phy_node).interfaces[0].ipv4_address
                             if phy_node.is_webServer : 
-                                ttl = autonetkit.console_script.parse_options().wsttl
+                                ttl = cs.parse_options().wsttl
                             if phy_node.is_client : 
-                                ttl = autonetkit.console_script.parse_options().clttl
+                                ttl = cs.parse_options().clttl
                             domain.addHost(name, address, ttl)
-                            
                     except Exception, error:
                         print("except compiler line 715 : "+str(error))
                 node.domains.append(domain)
-                node.TTL = autonetkit.console_script.parse_options().nsttl
+                node.TTL = cs.parse_options().nsttl
+                node.loadBalancingType = cs.parse_options().lbt
             # si c'est un slave, on recupere l'adresse du master
             if node.level=="slave":
                 for nod in g_dns.nodes():
                     if node.domain==nod.domain and (nod.is_nameServer or nod.is_rootServer) and nod.level=="master":
-                        node.primaryNameServerIP=self.nidb.node(nod.id).interfaces[0].ipv4_address
+                        node.primaryNameServerIP=self.nidb.node(nod).interfaces[0].ipv4_address
                         break
         
         # si c'est un client, on recupere son DNSResolver        
@@ -693,7 +680,7 @@ class NetkitCompiler(PlatformCompiler):
         if node.is_rootServer:
             node.domains = []
             for n in g_dns.nodes():
-                phy_node = g_phy.node(n.id)
+                phy_node = g_phy.node(n)
                 try :   # le noeud cd_12_6 peut causer de problemes
                     # tester si c'est un server d'une nouvelle zone, doit pas etre slave ni root
                     if phy_node.is_nameServer and not phy_node.is_rootServer and not n.level != "slave":
@@ -706,8 +693,7 @@ class NetkitCompiler(PlatformCompiler):
                 except AttributeError, error:
                     print("except compiler line 765: "+str(error))
                 except Exception, error:
-                    print("except compiler line 767: "+str(error)) 
-                     
+                    print("except compiler line 767: "+str(error))                    
                                     
         return
     
@@ -1051,4 +1037,4 @@ class Domain(object):
         self.clients.append((hostName,hostAddress, ttl))
         
     def __repr__(self):
-        return "name : "+ str(self.name)+" serverName "+ str(self.nameServerName)
+        return "name : "+self.name+" serverName "+self.nameServerName

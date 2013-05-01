@@ -566,7 +566,7 @@ def build_dns(anm):
         if subtype== "RS":
             #root_ns.add(node)
             root_ns=node
-    root_ns.Domains=[]       
+            
     #in each domain finding a resolver or name server
     ns_node={}
     ws_node={}
@@ -628,9 +628,10 @@ def build_dns(anm):
         # adding list of client to it 
 	
 	#setting domain value for the graph
+    g_dns.Domains = []
     for dom in domain:
         dm=build_dns_domain(dom,ns_node,ws_node,cl_node)
-        root_ns.Domains.append(dm)
+        g_dns.Domains.append(dm)
     return	 
     
         

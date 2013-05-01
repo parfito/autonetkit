@@ -297,83 +297,76 @@ class OverlayNode(object):
     @property
     def is_webServer(self):
         """Either from this graph or the physical graph"""
-        for dv_subtype in self.device_subtype.split('_'):
-            if dv_subtype == "WS" :
-                return True;
-        for dv_subtype in self.phy.device_subtype.split('_'):
-            if dv_subtype == "WS" :
-                return True;
+        try : # certain graphe peuvent ne pas contenir device_subtype
+            for dv_subtype in self.device_subtype.split('_'):
+                if dv_subtype == "WS" :
+                    return True;
+            for dv_subtype in self.phy.device_subtype.split('_'):
+                if dv_subtype == "WS" :
+                    return True;
+        except :
+            pass
         return False
 
     @property
     def is_DNSNode(self):
         """Either from this graph or the physical graph"""
-        return self.is_DNSResolver or self.is_nameServer or self.is_rootServer
-
+        return self.is_DNSResolver or self.is_nameServer or self.is_rootServer 
+    
     @property
     def is_client(self):
         """Either from this graph or the physical graph"""
-        for dv_subtype in self.device_subtype.split('_'):
-            if dv_subtype == "CL" :
-                return True;
-        for dv_subtype in self.phy.device_subtype.split('_'):
-            if dv_subtype == "CL" :
-                return True;
+        try : # certain graphe peuvent ne pas contenir device_subtype
+            for dv_subtype in self.device_subtype.split('_'):
+                if dv_subtype == "CL" :
+                    return True;
+            for dv_subtype in self.phy.device_subtype.split('_'):
+                if dv_subtype == "CL" :
+                    return True;
+        except :
+            pass
         return False                
     @property
     def is_DNSResolver(self):
         """Either from this graph or the physical graph"""
-        for dv_subtype in self.device_subtype.split('_'):
-            if dv_subtype == "DNSR" :
-                return True;
-        for dv_subtype in self.phy.device_subtype.split('_'):
-            if dv_subtype == "DNSR" :
-                return True;
+        try : # certain graphe peuvent ne pas contenir device_subtype
+            for dv_subtype in self.device_subtype.split('_'):
+                if dv_subtype == "DNSR" :
+                    return True;
+            for dv_subtype in self.phy.device_subtype.split('_'):
+                if dv_subtype == "DNSR" :
+                    return True;
+        except :
+            pass
         return False              
  
     @property
     def is_rootServer(self):
         """Either from this graph or the physical graph"""
-        for dv_subtype in self.device_subtype.split('_'):
-            if dv_subtype == "RS" :
-                return True;
-        for dv_subtype in self.phy.device_subtype.split('_'):
-            if dv_subtype == "RS" :
-                return True;
+        try : # certain graphe peuvent ne pas contenir device_subtype
+            for dv_subtype in self.device_subtype.split('_'):
+                if dv_subtype == "RS" :
+                    return True;
+            for dv_subtype in self.phy.device_subtype.split('_'):
+                if dv_subtype == "RS" :
+                    return True;
+        except :
+            pass
         return False
     @property
     def is_nameServer(self):
         """Either from this graph or the physical graph"""
-        for dv_subtype in self.device_subtype.split('_'):
-            if dv_subtype == "NS" :
-                return True;
-        for dv_subtype in self.phy.device_subtype.split('_'):
-            if dv_subtype == "NS" :
-                return True;
+        try : # certain graphe peuvent ne pas contenir device_subtype
+            for dv_subtype in self.device_subtype.split('_'):
+                if dv_subtype == "NS" :
+                    return True;
+            for dv_subtype in self.phy.device_subtype.split('_'):
+                if dv_subtype == "NS" :
+                    return True;
+        except :
+            pass
         return False
 
-#    @property
-#    def domain(self):
-#        g_dns = self['dns']
-#        for node in g_dns.nodes():
-#            dom=str(node.get("domain"))
-#            #creation de l'attribut domaine du noeud
-#            node.domain=dom
-#            
-#            node.name=node.get("name")
-#            node.level=node.get("Level")
-#        
-#            
-#            if dom!= None and dom!="":
-#                domain.add(dom)
-    
-
-#    @property
-#    def DSNResolver(self):
-#        """Either from this graph or the physical graph"""
-#        dns_label = self.get("DNSResolver")
-#        dns_reslover = 
-#        return self.device_subtype.count('NS') > 0 or self.phy.device_subtype.count('NS') > 0 
 
     def __getitem__(self, key):
         """Get item key"""

@@ -423,12 +423,15 @@ class nidb_node(object):
     @property
     def is_webServer(self):
         """Either from this graph or the physical graph"""
-        for dv_subtype in self.device_subtype.split('_'):
-            if dv_subtype == "WS" :
-                return True;
-        for dv_subtype in self.phy.device_subtype.split('_'):
-            if dv_subtype == "WS" :
-                return True;
+        try : # certain graphe peuvent ne pas contenir device_subtype
+            for dv_subtype in self.device_subtype.split('_'):
+                if dv_subtype == "WS" :
+                    return True;
+            for dv_subtype in self.phy.device_subtype.split('_'):
+                if dv_subtype == "WS" :
+                    return True;
+        except :
+            pass
         return False
 
     @property
@@ -439,43 +442,55 @@ class nidb_node(object):
     @property
     def is_client(self):
         """Either from this graph or the physical graph"""
-        for dv_subtype in self.device_subtype.split('_'):
-            if dv_subtype == "CL" :
-                return True;
-        for dv_subtype in self.phy.device_subtype.split('_'):
-            if dv_subtype == "CL" :
-                return True;
+        try : # certain graphe peuvent ne pas contenir device_subtype
+            for dv_subtype in self.device_subtype.split('_'):
+                if dv_subtype == "CL" :
+                    return True;
+            for dv_subtype in self.phy.device_subtype.split('_'):
+                if dv_subtype == "CL" :
+                    return True;
+        except :
+            pass
         return False                
     @property
     def is_DNSResolver(self):
         """Either from this graph or the physical graph"""
-        for dv_subtype in self.device_subtype.split('_'):
-            if dv_subtype == "DNSR" :
-                return True;
-        for dv_subtype in self.phy.device_subtype.split('_'):
-            if dv_subtype == "DNSR" :
-                return True;
+        try : # certain graphe peuvent ne pas contenir device_subtype
+            for dv_subtype in self.device_subtype.split('_'):
+                if dv_subtype == "DNSR" :
+                    return True;
+            for dv_subtype in self.phy.device_subtype.split('_'):
+                if dv_subtype == "DNSR" :
+                    return True;
+        except :
+            pass
         return False              
  
     @property
     def is_rootServer(self):
         """Either from this graph or the physical graph"""
-        for dv_subtype in self.device_subtype.split('_'):
-            if dv_subtype == "RS" :
-                return True;
-        for dv_subtype in self.phy.device_subtype.split('_'):
-            if dv_subtype == "RS" :
-                return True;
+        try : # certain graphe peuvent ne pas contenir device_subtype
+            for dv_subtype in self.device_subtype.split('_'):
+                if dv_subtype == "RS" :
+                    return True;
+            for dv_subtype in self.phy.device_subtype.split('_'):
+                if dv_subtype == "RS" :
+                    return True;
+        except :
+            pass
         return False
     @property
     def is_nameServer(self):
         """Either from this graph or the physical graph"""
-        for dv_subtype in self.device_subtype.split('_'):
-            if dv_subtype == "NS" :
-                return True;
-        for dv_subtype in self.phy.device_subtype.split('_'):
-            if dv_subtype == "NS" :
-                return True;
+        try : # certain graphe peuvent ne pas contenir device_subtype
+            for dv_subtype in self.device_subtype.split('_'):
+                if dv_subtype == "NS" :
+                    return True;
+            for dv_subtype in self.phy.device_subtype.split('_'):
+                if dv_subtype == "NS" :
+                    return True;
+        except :
+            pass
         return False
 
     def edges(self, *args, **kwargs):
