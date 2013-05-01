@@ -109,7 +109,6 @@ def manage_network(input_graph_string, timestamp, build_options, reload_build=Fa
 def parse_options():
     """Parse user-provided options"""
     import argparse
-    settings = config.settings
     usage = "autonetkit -f input.graphml"
     version = "%(prog)s " + str(ANK_VERSION)
     parser = argparse.ArgumentParser(description=usage, version=version)
@@ -142,13 +141,13 @@ def parse_options():
                         default=False, help="Measure")
     parser.add_argument('--webserver', action="store_true", default=False, help="Webserver")
     parser.add_argument('--grid', type=int, help="Webserver")
-    parser.add_argument('--lbt', type=int, default=settings['General']['loadBalType'],
+    parser.add_argument('--lbt', type=int,
                         help="load balancing type is cyclic by default")
-    parser.add_argument('--nsttl', type=int, default=settings['General']['nsttl'],
+    parser.add_argument('--nsttl', type=int,
                         help="name server ttl is 8000 by default")
-    parser.add_argument('--wsttl', type=int, default=settings['General']['wsttl'],
+    parser.add_argument('--wsttl', type=int,
                         help="web server ttl is 80 by default")
-    parser.add_argument('--clttl', type=int, default=settings['General']['clttl'],
+    parser.add_argument('--clttl', type=int,
                         help="client ttl is 8000 by default")
     arguments = parser.parse_args()
     return arguments
@@ -178,9 +177,9 @@ def main():
         'diff': options.diff or settings['General']['diff'],
         'archive': options.archive or settings['General']['archive'],
         'loadBalType': options.lbt or settings['General']['loadBalType'],
-        'nsttl': options.nsttl or settings['General']['nsttl'],      
-        'wsttl': options.wsttl or settings['General']['wsttl'],      
-        'clttl': options.clttl or settings['General']['clttl'],      
+        'NSTTL': options.nsttl or settings['General']['NSTTL'],      
+        'WSTTL': options.wsttl or settings['General']['WSTTL'],      
+        'CLTTL': options.clttl or settings['General']['CLTTL'],      
     }
 
     if options.webserver:
@@ -248,10 +247,11 @@ def compile_network(anm):
     g_phy = anm['phy']
     g_in=anm['input']
     g_ipv4 = anm['ipv4']
+    g_dns=anm['dns']
     g_graphics = anm['graphics']
 # TODO: build this on a platform by platform basis
     nidb.add_nodes_from(
-        g_in, retain=['label', 'host', 'platform', 'Network', 'update','level','domain','device_subtype','DNSResolver','device_type', 'name'])
+        g_in, retain=['label', 'host', 'platform', 'Network', 'update','level','domain','device_subtype','DNSResolver','device_type','name'])
 
     cd_nodes = [n for n in g_ipv4.nodes(
         "collision_domain") if not n.is_switch]  # Only add created cds - otherwise overwrite host of switched

@@ -1,7 +1,7 @@
 $TTL	604800
 
 
-.                       3600000  	IN  NS    root.
-root.       3600000     IN	A     10.0.0.10
+.                       3600000  	IN  NS    theroot.
+theroot.       3600000     IN	A     10.0.0.10
 
 
